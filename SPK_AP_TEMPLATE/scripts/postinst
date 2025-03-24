@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (c) 2000-2024 Synology Inc. All rights reserved.
+
 
 # Ustawienia podstawowe
 if [ -z "$SYNOPKG_PKGNAME" ]; then
