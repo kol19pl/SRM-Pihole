@@ -1,39 +1,137 @@
 #!/bin/sh
+# Copyright (c) 2000-2011 Synology Inc. All rights reserved.
 
-# Ustawienia podstawowe
+# =====================================
+# USTAWIENIA PAKIETU
+# =====================================
+
+# Sprawdzenie, czy zmienna środowiskowa z nazwą pakietu została ustawiona.
 if [ -z "$SYNOPKG_PKGNAME" ]; then
+    # W starszych wersjach DSM (przed 3.2) skrypt startowy uruchamiał się 
+    # bez zmiennych środowiskowych, więc trzeba ręcznie pobrać nazwę i wersję pakietu.
     PACKAGE_NAME="pi-hole"
-    PACKAGE_VER=$(get_key_value "/var/packages/${PACKAGE_NAME}/INFO" "version")
+    PACKAGE_VER=`get_key_value "/var/packages/${PACKAGE_NAME}/INFO" "version"`
 else
+    # Jeśli zmienna jest ustawiona, pobieramy jej wartość.
     PACKAGE_NAME=$SYNOPKG_PKGNAME
     PACKAGE_VER=$SYNOPKG_PKGVER
 fi
 
-# Ścieżki
-SCRIPTSPATH="/var/packages/${PACKAGE_NAME}/target/scripts"
-APP_PATH="/usr/syno/synoman/webman/3rdparty/$PACKAGE_NAME"
-PACKAGE_DIR="/var/packages/${PACKAGE_NAME}"
-PACKAGE_ENABLED="/var/packages/${PACKAGE_NAME}/etc/package.cfg"
-LOG_FILE="/var/log/pi-hole.log"
-SYNO_SERVICE_TOOL="/usr/syno/sbin/synoservice"
-PIHOLE_DIR="${PACKAGE_DIR}/target/pihole"
+# Definicja ścieżek do plików i katalogów używanych przez pakiet.
+PACKAGE_DIR="/var/packages/pi-hole"
+PACKAGE_DEST=$SYNOPKG_PKGDEST
+PACKAGE_CONFIG_MIGRATE_SH="/usr/syno/bin/package_config_migrate.sh"
+SERVICETOOL="/usr/syno/bin/servicetool"
+SED="/bin/sed"
 
-# Pobranie wersji DSM
-dsm_get_version() {
-    local version_file="/etc.defaults/VERSION"
-    [ -f "$version_file" ] || { echo "Brak pliku wersji DSM"; return 1; }
-    grep -s ^buildnumber ${version_file} | head -1 | awk -F '"' '{print $2}' | tr -d ' '
+# Lista kluczy ustawień pobierania, które będą przenoszone do nowej wersji pakietu.
+#SYNOINFO_KEYS="download_ul_rate download_dl_rate download_http_dl_rate download_start_port
+# download_port_map_enabled download_seeding_interval download_seeding_ratio download_order download_enable_dht download_dhtport
+# download_btencrypt download_btmaxpeers download_maxtasks download_nzb_server download_nzb_port download_nzb_auth download_bt_cache_limit
+
+ #download_alt_dl_rate download_alt_ul_rate download_amule_alt_dl_rate download_amule_alt_ul_rate download_enable_xunlei"
+
+# Lista starych kluczy ustawień, które mają zostać usunięte.
+#DELETE_SYNOINFO_KEYS="download_enabled download_when download_end_port support_download download_rapidshare_user
+# download_rapidshare_password download_megaupload_user download_megaupload_password filehosting_server download_httpftp_dl_rate"
+
+# =====================================
+# FUNKCJA INSTALUJĄCA PLIKI KONFIGURACYJNE
+# =====================================
+install_etc_and_initial() {
+    # Jeśli nie istnieje plik konfiguracyjny, skopiuj go z katalogu pakietu.
+    if [ ! -f "${PACKAGE_DIR}/etc/settings.conf" ]; then
+        cp -rf "${PACKAGE_DEST}"/etc/settings.conf "${PACKAGE_DIR}"/etc
+    fi
+
+    # Obsługa katalogu amule - jeśli istnieje, przenosimy do nowej lokalizacji.
+ #   if [ -d "/usr/syno/etc/amule" ]; then
+ #       cp -rf /usr/syno/etc/amule "${PACKAGE_DIR}"/etc
+#        if [ $? = 0 ]; then
+ #           rm -rf /usr/syno/etc/amule
+  #      fi
+  #  elif [ ! -d "${PACKAGE_DIR}/etc/amule" ]; then
+   #     cp -rf "${PACKAGE_DEST}"/etc/amule "${PACKAGE_DIR}"/etc
+   #     touch "${PACKAGE_DIR}"/etc/amule/synouser_default_destination.conf
+   # fi
+
+    # Tworzenie pustego pliku konfiguracyjnego dla aMule, jeśli go nie ma.
+  #  if [ ! -f "${PACKAGE_DIR}/etc/amule/synouser_default_destination.conf" ]; then
+  #      touch "${PACKAGE_DIR}"/etc/amule/synouser_default_destination.conf
+  #  fi
 }
-DSM_BUILD_NUM=$(dsm_get_version)
-AUTH_API_MIN_SUPPORT=2239
 
-# Tworzenie katalogu pihole
-if [ ! -d "$PIHOLE_DIR" ]; then
-    echo "Tworzę katalog Pi-hole: $PIHOLE_DIR"
-    mkdir -p "$PIHOLE_DIR"
-    chmod 755 "$PIHOLE_DIR"
-else
-    echo "Katalog Pi-hole już istnieje: $PIHOLE_DIR"
-fi
+# =====================================
+# FUNKCJA MIGRACJI USTAWIEŃ
+# =====================================
+upgradesetting() {
+    # Przenosi ustawienia pobierania do nowej wersji pakietu.
+    $PACKAGE_CONFIG_MIGRATE_SH move "/etc/synoinfo.conf" "${PACKAGE_DIR}/etc/settings.conf" "$SYNOINFO_KEYS"
+    $PACKAGE_CONFIG_MIGRATE_SH del "/etc/synoinfo.conf" "$DELETE_SYNOINFO_KEYS"
+}
+
+# =====================================
+# KONFIGURACJA PORTÓW
+# =====================================
+modify_port_setting() {
+   # local confPath="$1"
+   # local confKey="$2"
+   # local portDefault="$3"
+   # local portType="$4"
+   # local portFile="$5"
+
+  #  local portValue=`/bin/get_key_value ${confPath} ${confKey}`
+  #  if [ ! "${portValue}" == "" -a ! "${portValue}" == "0" ]; then
+  #      ${SED} -i "s,${portDefault}/${portType},${portValue}/${portType}," ${portFile}
+  #  fi
+}
+
+install_port_setting() {
+    
+   
+   
+
+  
+    
+}
+
+# =====================================
+# INSTALACJA SKRYPTÓW UŻYTKOWNIKÓW
+# =====================================
+install_synosdk_userhook_plugin() {
+    local piScriptsPath="${PACKAGE_DIR}/target/pakiet/scripts"
+    local destusercommon="/usr/local/libexec"
+
+   if [ ! -d ${destusercommon} ]; then
+        mkdir -p ${destusercommon}
+    fi
+    ln -s "${piScriptsPath}/Install.sh" "${destusercommon}/Install.sh"
+}
+
+# =====================================
+# MIGRACJA PLIKÓW I KONFIGURACJI PAKIETU
+# =====================================
+migrate() {
+    OLD_PKGVER_FILE="/tmp/synodl_old_pkgver"
+    if [ -f $OLD_PKGVER_FILE ]; then
+        read SYNOPKG_OLD_PKGVER < $OLD_PKGVER_FILE
+        rm $OLD_PKGVER_FILE
+    fi
+
+    migrate_script_dir="/var/packages/${SYNOPKG_PKGNAME}/target/pakiet/scripts/migrate"
+    migrate_scripts=$(find $migrate_script_dir/ -name "*.sh" | sort)
+    for script in $migrate_scripts; do
+        SYNODL_OLD_PKGVER=${SYNOPKG_OLD_PKGVER} $script
+    done
+}
+
+# =====================================
+# WYWOŁYWANIE FUNKCJI W TRAKCIE INSTALACJI
+# =====================================
+install_etc_and_initial
+upgradesetting
+install_port_setting
+install_synosdk_userhook_plugin
+migrate
 
 exit 0

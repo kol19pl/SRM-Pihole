@@ -11,66 +11,145 @@ else
 fi
 
 # Ścieżki
-SCRIPTSPATH="/var/packages/${PACKAGE_NAME}/target/scripts"
+SCRIPTSPATH="/var/packages/${PACKAGE_NAME}/target/pakiet/scripts"
 APP_PATH="/usr/syno/synoman/webman/3rdparty/$PACKAGE_NAME"
+LIMIT_CONFIG="/etc/synopackageslimit.conf"
+DSM_INDEX_ADD="/usr/syno/bin/pkgindexer_add"
+DSM_INDEX_DEL="/usr/syno/bin/pkgindexer_del"
 PACKAGE_DIR="/var/packages/${PACKAGE_NAME}"
-PACKAGE_ENABLED="/var/packages/${PACKAGE_NAME}/etc/package.cfg"
-LOG_FILE="/var/log/pi-hole.log"
+PKG_APP_PATH="${PACKAGE_DIR}/target/pakiet/ui"
+PACKAGE_ENABLED="${PACKAGE_DIR}/enabled"
+PACKAGE_LIMIT=`get_key_value ${LIMIT_CONFIG} ${PACKAGE_NAME}`
 SYNO_SERVICE_TOOL="/usr/syno/sbin/synoservice"
 
-# Pobranie wersji DSM
-dsm_get_version() {
-    local version_file="/etc.defaults/VERSION"
-    [ -f "$version_file" ] || { echo "Brak pliku wersji DSM"; return 1; }
-    grep -s ^buildnumber ${version_file} | head -1 | awk -F '"' '{print $2}' | tr -d ' '
+
+#WebApi
+SYSTEM_WEBAPI_DIR="/usr/syno/synoman/webapi"
+PACKAGE_WEBAPI_DIR="${PACKAGE_DIR}/target/pakiet/webapi"
+PACKAGE_API_FILE="pi.api"
+PACKAGE_AUTH_FILE="pi.auth"
+AUTH_API_FILE="Auth.api"
+WEBAPIV5_TASK_LIB="SYNO.pi.Task.lib"
+WEBAPIV5_BT_TASK_LIB="SYNO.pi.Task.BT.lib"
+WEBAPIV5_THUMBNAIL_LIB="SYNO.pi.Thumbnail.lib"
+
+
+
+
+
+
+
+
+pkg_get_dsm_version() {
+	local version_file="/etc.defaults/VERSION"
+
+	if [ ! -f "$version_file" ]; then
+		echo "pkg_get_dsm_version: can not find version file '$version_file'"
+		return 1
+	fi
+	local buildnumber=`grep -s ^buildnumber ${version_file} | head -1 | awk -F \" '{print $2}' | sed 's/ //g'`
+	echo ${buildnumber}
 }
-DSM_BUILD_NUM=$(dsm_get_version)
+DSM_BUILD_NUM=$(pkg_get_dsm_version)
 AUTH_API_MIN_SUPPORT=2239
 
-# Funkcja startowa
-start() {
-    echo "$(date) - Uruchamianie Pi-hole..." >> $LOG_FILE
-    $SYNO_SERVICE_TOOL --start pi-hole
+
+
+
+CreateWebapiLink()
+{
+	ln -sf ${PACKAGE_WEBAPI_DIR}/${PACKAGE_AUTH_FILE} ${SYSTEM_WEBAPI_DIR}/${PACKAGE_AUTH_FILE}
+	ln -sf ${PACKAGE_WEBAPI_DIR}/${PACKAGE_API_FILE} ${SYSTEM_WEBAPI_DIR}/${PACKAGE_API_FILE}
+	ln -sf ${PACKAGE_WEBAPI_DIR} ${SYSTEM_WEBAPI_DIR}/${PACKAGE_NAME}
+
+	if [ ${DSM_BUILD_NUM} -lt ${AUTH_API_MIN_SUPPORT} ]; then
+		ln -sf ${PACKAGE_WEBAPI_DIR}/${AUTH_API_FILE} ${SYSTEM_WEBAPI_DIR}/${AUTH_API_FILE}
+	fi
+
+	ln -sf ${PACKAGE_WEBAPI_DIR}/${WEBAPIV5_TASK_LIB} ${SYSTEM_WEBAPI_DIR}/${WEBAPIV5_TASK_LIB}
+	ln -sf ${PACKAGE_WEBAPI_DIR}/${WEBAPIV5_BT_TASK_LIB} ${SYSTEM_WEBAPI_DIR}/${WEBAPIV5_BT_TASK_LIB}
+	ln -sf ${PACKAGE_WEBAPI_DIR}/${WEBAPIV5_THUMBNAIL_LIB} ${SYSTEM_WEBAPI_DIR}/${WEBAPIV5_THUMBNAIL_LIB}
 }
 
-# Funkcja stop
-stop() {
-    echo "$(date) - Zatrzymywanie Pi-hole..." >> $LOG_FILE
-    $SYNO_SERVICE_TOOL --stop pi-hole
+
+RemoveWebapiLink()
+{
+	rm -rf ${SYSTEM_WEBAPI_DIR}/${PACKAGE_AUTH_FILE}
+	rm -rf ${SYSTEM_WEBAPI_DIR}/${PACKAGE_API_FILE}
+	rm -rf ${SYSTEM_WEBAPI_DIR}/${PACKAGE_NAME}
+
+	if [ ${DSM_BUILD_NUM} -lt ${AUTH_API_MIN_SUPPORT} ]; then
+		rm -rf ${SYSTEM_WEBAPI_DIR}/${AUTH_API_FILE}
+	fi
+
+	rm -rf ${SYSTEM_WEBAPI_DIR}/${WEBAPIV5_TASK_LIB}
+	rm -rf ${SYSTEM_WEBAPI_DIR}/${WEBAPIV5_BT_TASK_LIB}
+	rm -rf ${SYSTEM_WEBAPI_DIR}/${WEBAPIV5_THUMBNAIL_LIB}
 }
 
-# Funkcja killall
-killall() {
-    echo "$(date) - Zabijanie wszystkich procesów Pi-hole..." >> $LOG_FILE
-    pkill -f pihole-FTL
+
+
+
+
+
+start()
+{
+	${SYNO_SERVICE_TOOL} --setshare pihole
+
+	#rm ${PACKAGE_DIR}/etc/download/settings.json
+	#rm ${PACKAGE_DIR}/etc/amule/statistics.dat
+
+	if [ ! -f "/lib/libsynotrigger.so" ]; then
+		ln -s "${PACKAGE_DIR}"/target/lib/libsynotrigger.so /lib/libsynotrigger.so
+	fi
+
+	#$SCRIPTSPATH/S25download.sh start
+
+	#if [ -n "$SYNOPKG_PKG_STATUS" ]; then
+	#	${DSM_INDEX_ADD} ${PKG_APP_PATH}/index.conf ${PKG_INDEXDB_PATH}/appindexdb
+	#	${DSM_INDEX_ADD} ${PKG_APP_PATH}/helptoc.conf ${PKG_INDEXDB_PATH}/helpindexdb
+	#	$SCRIPTSPATH/ReloadThirdPartyPath.sh add
+	#	$SCRIPTSPATH/ReloadThirdPartyPath.sh hupapache
+	#fi
+
+	#CreateWebapiLink
 }
 
-# Główna obsługa przypadków
+
+stop()
+{
+	#RemoveWebapiLink
+	#$SCRIPTSPATH/S25download.sh stop
+
+	#if [ -n "$SYNOPKG_PKG_STATUS" ]; then
+	#	${DSM_INDEX_DEL} ${PKG_APP_PATH}/index.conf ${PKG_INDEXDB_PATH}/appindexdb
+	#	${DSM_INDEX_DEL} ${PKG_APP_PATH}/helptoc.conf ${PKG_INDEXDB_PATH}/helpindexdb
+	#	$SCRIPTSPATH/ReloadThirdPartyPath.sh delete
+	#	if [ "UPGRADE" != "$SYNOPKG_PKG_STATUS" ]; then
+	#		$SCRIPTSPATH/ReloadThirdPartyPath.sh hupapache &
+	#	fi
+	#fi
+}
+
+
+
+
 case $1 in
-    start)
-        if [ ! -f $PACKAGE_ENABLED ]; then
-            exit 0
-        fi
-        start
-        exit 0
-    ;;
-    stop)
-        stop
-        exit 0
-    ;;
-    status)
-        [ -e ${APP_PATH} ] && exit 0 || exit 1
-    ;;
-    killall)
-        killall
-        exit 0
-    ;;
-    log)
-        tail -f $LOG_FILE
-    ;;
-    *)
-        echo "Użycie: $0 {start|stop|status|killall|log}"
-        exit 1
-    ;;
+	start)
+		[ ! -f $PACKAGE_ENABLED ] && exit 0
+		start
+		exit 0
+	;;
+	stop)
+		stop
+		exit 0
+	;;
+	status)
+		[ -e ${APP_PATH} ] && exit 0 || exit 1
+	;;
+	killall)
+        ;;
+	log)
+		exit 0
+	;;
 esac
-

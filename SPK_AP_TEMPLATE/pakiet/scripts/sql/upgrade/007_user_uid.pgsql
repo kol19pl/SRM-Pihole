@@ -1,0 +1,6 @@
+BEGIN;
+
+ALTER TABLE user_setting ADD COLUMN uid int4 DEFAULT -1;
+
+COMMIT;
+

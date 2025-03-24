@@ -7,7 +7,7 @@ if [ -d "SPK_AP_TEMPLATE" ]; then
     # Use INFO file from SPK_AP_TEMPLATE folder
     cp "SPK_AP_TEMPLATE/INFO" "$workDir/"
     cp -R "SPK_AP_TEMPLATE/scripts" "$workDir/"
-    cp -R "SPK_AP_TEMPLATE/ui" "$workDir/"
+  #  cp -R "SPK_AP_TEMPLATE/ui" "$workDir/"
     
 else
     echo "ℹ SPK_AP_TEMPLATE folder not found. Please create it with the required INFO file and re-run this script."
@@ -27,7 +27,7 @@ mkdir -p "$workDir"
 # Copy INFO file to working directory
 cp "SPK_AP_TEMPLATE/INFO" "$workDir/"
 cp -R "SPK_AP_TEMPLATE/scripts" "$workDir/"
-cp -R "SPK_AP_TEMPLATE/ui" "$workDir/"
+#cp -R "SPK_AP_TEMPLATE/ui" "$workDir/"
 
 echo "ℹ Skrypty startowe skopiowane"
 
@@ -62,6 +62,7 @@ chmod +x "$workDir/scripts/"
 
 # Tworzenie archiwum .tgz z plikami pakietu
 echo "📦 Tworzenie archiwum tar.gz (package.tgz)..."
+cp -R "SPK_AP_TEMPLATE/pakiet" "$workDir/package"
 tar -czf "$workDir/package.tgz" -C "$workDir/package" .
 
 # Tworzenie finalnego pliku .spk, zawierającego INFO oraz package.tgz
@@ -72,11 +73,11 @@ cd "$workDir"
 if [ -f ""$workDir"/PACKAGE_ICON.PNG" ]; then
 
 echo "ℹ Ikonki są"
-tar -cf "$outputFile" INFO package.tgz scripts/ ui/ PACKAGE_ICON.PNG PACKAGE_ICON_256.PNG
+tar -cf "$outputFile" INFO package.tgz scripts/  PACKAGE_ICON.PNG PACKAGE_ICON_256.PNG
 
 else
     echo "ℹ Brak ikon"
-    tar -cf "$outputFile" INFO package.tgz scripts/ ui/
+    tar -cf "$outputFile" INFO package.tgz scripts/ 
 fi
 
 

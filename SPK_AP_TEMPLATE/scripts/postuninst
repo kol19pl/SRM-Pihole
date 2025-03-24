@@ -1,8 +1,53 @@
 #!/bin/sh
+# Copyright (c) 2000-2011 Synology Inc. All rights reserved.
 
+# =====================================
+# DEFINICJA NARZĘDZIA SYSTEMOWEGO
+# =====================================
 
+# Ścieżka do narzędzia servicetool, używanego do zarządzania konfiguracją usług w Synology DSM
 SERVICETOOL="/usr/syno/bin/servicetool"
 
+# =====================================
+# FUNKCJA USUWANIA KONFIGURACJI PORTÓW
+# =====================================
+remove_port_setting()
+{
+	# Usuwa plik konfiguracyjny związany z przekierowaniem portów dla pakietu Download Station
+	#${SERVICETOOL} --remove-configure-file --package synodownload_port
+}
 
+# =====================================
+# FUNKCJA USUWANIA SKRYPTÓW OBSŁUGI UŻYTKOWNIKÓW
+# =====================================
+remove_synosdk_userhook_plugin()
+{
+	# Definiujemy ścieżki do skryptów użytkownika, które należy usunąć
+	#local destusercommonfile="/usr/local/libexec/DownloadUserCommon.sh"
+#	local destusersetfile="/usr/local/libexec/user_set/synodownload_userset.sh"
+	#local destuserdeletefile="/usr/local/libexec/user_delete/synodownload_userdelete.sh"
 
+	# Usuwamy pliki skryptów, jeśli istnieją
+	#rm -f ${destusercommonfile} ${destusersetfile} ${destuserdeletefile}
+}
+
+# =====================================
+# FUNKCJA USUWANIA BIBLIOTEKI SYSTEMOWEJ
+# =====================================
+remove_libsynotrigger()
+{
+	# Usuwa bibliotekę współdzieloną libsynotrigger.so
+	rm "/lib/libsynotrigger.so"
+}
+
+# =====================================
+# WYWOŁANIE FUNKCJI USUWANIA
+# =====================================
+
+remove_port_setting             # Usunięcie konfiguracji portów
+remove_synosdk_userhook_plugin  # Usunięcie skryptów użytkownika
+remove_libsynotrigger           # Usunięcie biblioteki systemowej
+
+# Skrypt kończy działanie z kodem wyjścia 0 (sukces)
 exit 0
+

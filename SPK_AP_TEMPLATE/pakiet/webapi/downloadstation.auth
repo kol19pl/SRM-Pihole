@@ -1,0 +1,6 @@
+{
+	"ip_checking": false,
+	"timeout": -2,
+	"privilege": "SYNO.SDS.DownloadStation.Application",
+	"allow_user": ["admin", "local"]
+}

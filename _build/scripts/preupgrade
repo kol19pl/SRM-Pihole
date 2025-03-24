@@ -1,6 +1,6 @@
 #!/bin/sh
 
 
-
+echo "$SYNOPKG_OLD_PKGVER" > /tmp/pi_old_pkgver
 
 exit 0

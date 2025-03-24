@@ -1,0 +1,5 @@
+BEGIN;
+
+ALTER TABLE rss_filter ADD COLUMN is_regex bool DEFAULT FALSE;
+
+COMMIT;

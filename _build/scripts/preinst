@@ -12,6 +12,7 @@
 
     # Instructions for user
 
+notify-send "pi" "set-up"
 
 
 # 5. No news is good news
