@@ -3,25 +3,6 @@
 
 SERVICETOOL="/usr/syno/bin/servicetool"
 
-remove_port_setting()
-{
-	
-}
 
-remove_synosdk_userhook_plugin()
-{
-	
-
-	
-}
-
-remove_libsynotrigger()
-{
-	
-}
-
-remove_port_setting
-remove_synosdk_userhook_plugin
-remove_libsynotrigger
 
 exit 0

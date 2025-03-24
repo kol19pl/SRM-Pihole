@@ -1,6 +1,5 @@
 #!/bin/sh
 
-
 # Ustawienia podstawowe
 if [ -z "$SYNOPKG_PKGNAME" ]; then
     PACKAGE_NAME="pi-hole"
@@ -17,6 +16,7 @@ PACKAGE_DIR="/var/packages/${PACKAGE_NAME}"
 PACKAGE_ENABLED="/var/packages/${PACKAGE_NAME}/etc/package.cfg"
 LOG_FILE="/var/log/pi-hole.log"
 SYNO_SERVICE_TOOL="/usr/syno/sbin/synoservice"
+PIHOLE_DIR="${PACKAGE_DIR}/target/pihole"
 
 # Pobranie wersji DSM
 dsm_get_version() {
@@ -27,8 +27,13 @@ dsm_get_version() {
 DSM_BUILD_NUM=$(dsm_get_version)
 AUTH_API_MIN_SUPPORT=2239
 
-
-
-
+# Tworzenie katalogu pihole
+if [ ! -d "$PIHOLE_DIR" ]; then
+    echo "Tworzę katalog Pi-hole: $PIHOLE_DIR"
+    mkdir -p "$PIHOLE_DIR"
+    chmod 755 "$PIHOLE_DIR"
+else
+    echo "Katalog Pi-hole już istnieje: $PIHOLE_DIR"
+fi
 
 exit 0

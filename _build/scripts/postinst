@@ -1,6 +1,5 @@
 #!/bin/sh
 
-
 # Ustawienia podstawowe
 if [ -z "$SYNOPKG_PKGNAME" ]; then
     PACKAGE_NAME="pi-hole"
@@ -17,6 +16,7 @@ PACKAGE_DIR="/var/packages/${PACKAGE_NAME}"
 PACKAGE_ENABLED="/var/packages/${PACKAGE_NAME}/etc/package.cfg"
 LOG_FILE="/var/log/pi-hole.log"
 SYNO_SERVICE_TOOL="/usr/syno/sbin/synoservice"
+PIHOLE_DIR="${PACKAGE_DIR}/target/pihole"
 
 # Pobranie wersji DSM
 dsm_get_version() {
@@ -27,38 +27,13 @@ dsm_get_version() {
 DSM_BUILD_NUM=$(dsm_get_version)
 AUTH_API_MIN_SUPPORT=2239
 
-install_etc_and_initial() {
-    echo "$(date) - Instalacja plików konfiguracyjnych..." >> $LOG_FILE
-}
-
-upgradesetting() {
-    echo "$(date) - Aktualizacja ustawień..." >> $LOG_FILE
-}
-
-modify_port_setting() {
-    echo "$(date) - Modyfikacja ustawień portów..." >> $LOG_FILE
-}
-
-install_port_setting() {
-    echo "$(date) - Instalacja ustawień portów..." >> $LOG_FILE
-}
-
-install_synosdk_userhook_plugin() {
-    echo "$(date) - Instalacja pluginu Synology SDK..." >> $LOG_FILE
-}
-
-migrate() {
-    echo "$(date) - Migracja ustawień..." >> $LOG_FILE
-}
-
-
-
-
-
-install_etc_and_initial
-upgradesetting
-install_port_setting
-install_synosdk_userhook_plugin
-migrate
+# Tworzenie katalogu pihole
+if [ ! -d "$PIHOLE_DIR" ]; then
+    echo "Tworzę katalog Pi-hole: $PIHOLE_DIR"
+    mkdir -p "$PIHOLE_DIR"
+    chmod 755 "$PIHOLE_DIR"
+else
+    echo "Katalog Pi-hole już istnieje: $PIHOLE_DIR"
+fi
 
 exit 0
