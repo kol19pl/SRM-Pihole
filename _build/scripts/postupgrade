@@ -1,0 +1,16 @@
+#!/bin/sh
+# Copyright (c) 2000-2011 Synology Inc. All rights reserved.
+
+encrypt_account_info()
+{
+	/var/packages/DownloadStation/target/bin/synodlupgradetool
+
+	/usr/bin/php -n -d display_errors=Off -d extension_dir=/lib/php/modules -d safe_mode_exec_dir=/bin -d extension=curl.so -d extension=iconv.so -d extension=syno_compiler.so -d extension=bz2.so -d extension=json.so -d extension=mcrypt.so /var/packages/DownloadStation/target/hostscript/host.php -e all
+
+	/usr/bin/php -n -d display_errors=Off -d extension_dir=/lib/php/modules -d safe_mode_exec_dir=/bin -d extension=curl.so -d extension=iconv.so -d extension=syno_compiler.so -d extension=pdo.so -d extension=pdo_sqlite.so -d extension=bz2.so -d extension=json.so -d extension=xml.so -d extension=mcrypt.so /var/packages/DownloadStation/target/btsearch/btsearch.php -e all
+
+}
+
+encrypt_account_info
+
+exit 0

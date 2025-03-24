@@ -1,0 +1,106 @@
+#!/bin/sh
+# Copyright (c) 2000-2011 Synology Inc. All rights reserved.
+
+# customized items of package
+if [ -z "$SYNOPKG_PKGNAME" ]; then
+        # prior DSM 3.2, start script will be run without environment variable
+        #  at boot time, thus we need a workaround to gather name and version info
+        PACKAGE_NAME="pi-hole"
+        PACKAGE_VER=`get_key_value "/var/packages/${PACKAGE_NAME}/INFO" "version"`
+else
+        PACKAGE_NAME=$SYNOPKG_PKGNAME
+        PACKAGE_VER=$SYNOPKG_PKGVER
+fi
+
+
+PACKAGE_DIR="/var/packages/pi-hole"
+PACKAGE_DEST=$SYNOPKG_PKGDEST
+#PACKAGE_CONFIG_MIGRATE_SH="/usr/syno/bin/package_config_migrate.sh"
+SERVICETOOL="/usr/syno/bin/servicetool"
+SED="/bin/sed"
+
+SYNOINFO_KEYS=""
+
+DELETE_SYNOINFO_KEYS=""
+
+install_etc_and_initial() {
+
+	if [ ! -f "${PACKAGE_DIR}/etc/settings.conf" ]; then
+		cp -rf "${PACKAGE_DEST}"/etc/settings.conf "${PACKAGE_DIR}"/etc
+	fi
+
+	if [ -d "/usr/syno/etc/amule" ]; then
+		cp -rf /usr/syno/etc/amule "${PACKAGE_DIR}"/etc
+		if [ $? = 0 ]; then
+			rm -rf /usr/syno/etc/amule
+		fi
+	elif [ ! -d "${PACKAGE_DIR}/etc/amule" ]; then
+		cp -rf "${PACKAGE_DEST}"/etc/amule "${PACKAGE_DIR}"/etc
+		touch "${PACKAGE_DIR}"/etc/amule/synouser_default_destination.conf
+	fi
+	if [ ! -f "${PACKAGE_DIR}/etc/amule/synouser_default_destination.conf" ]; then
+		touch "${PACKAGE_DIR}"/etc/amule/synouser_default_destination.conf
+	fi
+
+	if [ -d "/usr/syno/etc/download" ]; then
+		cp -rf /usr/syno/etc/download "${PACKAGE_DIR}"/etc
+		if [ $? = 0 ]; then
+			rm -rf /usr/syno/etc/download
+		fi
+	elif [ ! -d "${PACKAGE_DIR}/etc/download" ]; then
+		mkdir -m 755 "${PACKAGE_DIR}"/etc/download
+		touch "${PACKAGE_DIR}"/etc/download/host.conf
+		touch "${PACKAGE_DIR}"/etc/download/btsearch.conf
+	fi
+	if [ ! -f "${PACKAGE_DIR}/etc/download/host.conf" ]; then
+		touch "${PACKAGE_DIR}"/etc/download/host.conf
+	fi
+	if [ ! -f "${PACKAGE_DIR}/etc/download/btsearch.conf" ]; then
+		touch "${PACKAGE_DIR}"/etc/download/btsearch.conf
+	fi
+}
+
+
+upgradesetting() {
+	$PACKAGE_CONFIG_MIGRATE_SH move "/etc/synoinfo.conf" "${PACKAGE_DIR}/etc/settings.conf" "$SYNOINFO_KEYS"
+	$PACKAGE_CONFIG_MIGRATE_SH del "/etc/synoinfo.conf" "$DELETE_SYNOINFO_KEYS"
+	
+}
+
+modify_port_setting()
+{
+	
+}
+
+install_port_setting()
+{
+		
+}
+
+install_synosdk_userhook_plugin()
+{
+	
+}
+
+migrate()
+{
+	OLD_PKGVER_FILE="/tmp/synodl_old_pkgver"
+	if [ -f $OLD_PKGVER_FILE ]; then
+		read SYNOPKG_OLD_PKGVER < $OLD_PKGVER_FILE
+		rm $OLD_PKGVER_FILE
+	fi
+
+	migrate_script_dir="/var/packages/${SYNOPKG_PKGNAME}/target/scripts/migrate"
+	migrate_scripts=$(find $migrate_script_dir/ -name "*.sh" | sort)
+	for script in $migrate_scripts; do
+		SYNODL_OLD_PKGVER=${SYNOPKG_OLD_PKGVER} $script
+	done
+}
+
+install_etc_and_initial
+upgradesetting
+install_port_setting
+install_synosdk_userhook_plugin
+migrate
+
+exit 0
