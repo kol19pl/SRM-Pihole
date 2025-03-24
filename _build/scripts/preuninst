@@ -1,4 +1,6 @@
 #!/bin/sh
 # Copyright (c) 2000-2011 Synology Inc. All rights reserved.
-
-exit 0
+#!/bin/sh
+. $(dirname $0)/installer
+$(basename $0) > $SYNOPKG_TEMP_LOGFILE
+#exit 0

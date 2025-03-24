@@ -11,11 +11,12 @@
 
 
     # Instructions for user
-
+. $(dirname $0)/installer
+$(basename $0) > $SYNOPKG_TEMP_LOGFILE
 notify-send "pi" "set-up"
 
 
 # 5. No news is good news
 
 
-exit 0
+

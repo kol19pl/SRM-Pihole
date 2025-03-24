@@ -7,6 +7,8 @@ if [ -d "SPK_AP_TEMPLATE" ]; then
     # Use INFO file from SPK_AP_TEMPLATE folder
     cp "SPK_AP_TEMPLATE/INFO" "$workDir/"
     cp -R "SPK_AP_TEMPLATE/scripts" "$workDir/"
+    cp -R "SPK_AP_TEMPLATE/WIZARD_UIFILES" "$workDir/"
+    cp -R "SPK_AP_TEMPLATE/conf" "$workDir/"
   #  cp -R "SPK_AP_TEMPLATE/ui" "$workDir/"
     
 else
@@ -27,6 +29,8 @@ mkdir -p "$workDir"
 # Copy INFO file to working directory
 cp "SPK_AP_TEMPLATE/INFO" "$workDir/"
 cp -R "SPK_AP_TEMPLATE/scripts" "$workDir/"
+cp -R "SPK_AP_TEMPLATE/WIZARD_UIFILES" "$workDir/"
+cp -R "SPK_AP_TEMPLATE/conf" "$workDir/"
 #cp -R "SPK_AP_TEMPLATE/ui" "$workDir/"
 
 echo "ℹ Skrypty startowe skopiowane"
@@ -73,11 +77,11 @@ cd "$workDir"
 if [ -f ""$workDir"/PACKAGE_ICON.PNG" ]; then
 
 echo "ℹ Ikonki są"
-tar -cf "$outputFile" INFO package.tgz scripts/  PACKAGE_ICON.PNG PACKAGE_ICON_256.PNG
+tar -cf "$outputFile" INFO package.tgz scripts/ WIZARD_UIFILES/ conf/  PACKAGE_ICON.PNG PACKAGE_ICON_256.PNG
 
 else
     echo "ℹ Brak ikon"
-    tar -cf "$outputFile" INFO package.tgz scripts/ 
+    tar -cf "$outputFile" INFO package.tgz scripts/  WIZARD_UIFILES/ conf/
 fi
 
 

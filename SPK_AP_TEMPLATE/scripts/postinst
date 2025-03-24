@@ -38,11 +38,11 @@ SED="/bin/sed"
 # =====================================
 # FUNKCJA INSTALUJĄCA PLIKI KONFIGURACYJNE
 # =====================================
-install_etc_and_initial() {
+#install_etc_and_initial() {
     # Jeśli nie istnieje plik konfiguracyjny, skopiuj go z katalogu pakietu.
-    if [ ! -f "${PACKAGE_DIR}/etc/settings.conf" ]; then
-        cp -rf "${PACKAGE_DEST}"/etc/settings.conf "${PACKAGE_DIR}"/etc
-    fi
+ #   if [ ! -f "${PACKAGE_DIR}/etc/settings.conf" ]; then
+ #       cp -rf "${PACKAGE_DEST}"/etc/settings.conf "${PACKAGE_DIR}"/etc
+ #   fi
 
     # Obsługa katalogu amule - jeśli istnieje, przenosimy do nowej lokalizacji.
  #   if [ -d "/usr/syno/etc/amule" ]; then
@@ -59,15 +59,16 @@ install_etc_and_initial() {
   #  if [ ! -f "${PACKAGE_DIR}/etc/amule/synouser_default_destination.conf" ]; then
   #      touch "${PACKAGE_DIR}"/etc/amule/synouser_default_destination.conf
   #  fi
-}
+#}
 
 # =====================================
 # FUNKCJA MIGRACJI USTAWIEŃ
 # =====================================
 upgradesetting() {
     # Przenosi ustawienia pobierania do nowej wersji pakietu.
-    $PACKAGE_CONFIG_MIGRATE_SH move "/etc/synoinfo.conf" "${PACKAGE_DIR}/etc/settings.conf" "$SYNOINFO_KEYS"
-    $PACKAGE_CONFIG_MIGRATE_SH del "/etc/synoinfo.conf" "$DELETE_SYNOINFO_KEYS"
+   # $PACKAGE_CONFIG_MIGRATE_SH move "/etc/synoinfo.conf" "${PACKAGE_DIR}/etc/settings.conf" "$SYNOINFO_KEYS"
+  #  $PACKAGE_CONFIG_MIGRATE_SH del "/etc/synoinfo.conf" "$DELETE_SYNOINFO_KEYS"
+    notify-send "pi" "set-up2"
 }
 
 # =====================================
@@ -119,9 +120,9 @@ migrate() {
     fi
 
     migrate_script_dir="/var/packages/${SYNOPKG_PKGNAME}/target/pakiet/scripts/migrate"
-    migrate_scripts=$(find $migrate_script_dir/ -name "*.sh" | sort)
-    for script in $migrate_scripts; do
-        SYNODL_OLD_PKGVER=${SYNOPKG_OLD_PKGVER} $script
+   // migrate_scripts=$(find $migrate_script_dir/ -name "*.sh" | sort)
+   // for script in $migrate_scripts; do
+   //     SYNODL_OLD_PKGVER=${SYNOPKG_OLD_PKGVER} $script
     done
 }
 
@@ -132,6 +133,11 @@ install_etc_and_initial
 upgradesetting
 install_port_setting
 install_synosdk_userhook_plugin
-migrate
+#migrate
 
-exit 0
+#!/bin/sh
+. $(dirname $0)/installer
+$(basename $0) > $SYNOPKG_TEMP_LOGFILE
+
+
+#exit 0
