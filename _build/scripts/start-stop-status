@@ -1,96 +1,76 @@
 #!/bin/sh
-# Copyright (c) 2000-2012 Synology Inc. All rights reserved.
+# Copyright (c) 2000-2024 Synology Inc. All rights reserved.
 
-# customized items of package
+# Ustawienia podstawowe
 if [ -z "$SYNOPKG_PKGNAME" ]; then
-	# prior DSM 3.2, start script will be run without environment variable
-	#  at boot time, thus we need a workaround to gather name and version info
-	PACKAGE_NAME="pi-hole"
-	PACKAGE_VER=`get_key_value "/var/packages/${PACKAGE_NAME}/INFO" "version"`
+    PACKAGE_NAME="pi-hole"
+    PACKAGE_VER=$(get_key_value "/var/packages/${PACKAGE_NAME}/INFO" "version")
 else
-	PACKAGE_NAME=$SYNOPKG_PKGNAME
-	PACKAGE_VER=$SYNOPKG_PKGVER
+    PACKAGE_NAME=$SYNOPKG_PKGNAME
+    PACKAGE_VER=$SYNOPKG_PKGVER
 fi
 
+# Ścieżki
 SCRIPTSPATH="/var/packages/${PACKAGE_NAME}/target/scripts"
 APP_PATH="/usr/syno/synoman/webman/3rdparty/$PACKAGE_NAME"
-
-LIMIT_CONFIG="/etc/synopackageslimit.conf"
-DSM_INDEX_ADD="/usr/syno/bin/pkgindexer_add"
-DSM_INDEX_DEL="/usr/syno/bin/pkgindexer_del"
 PACKAGE_DIR="/var/packages/${PACKAGE_NAME}"
-
-PACKAGE_LIMIT=`get_key_value ${LIMIT_CONFIG} ${PACKAGE_NAME}`
+PACKAGE_ENABLED="/var/packages/${PACKAGE_NAME}/etc/package.cfg"
+LOG_FILE="/var/log/pi-hole.log"
 SYNO_SERVICE_TOOL="/usr/syno/sbin/synoservice"
 
-
-
-
-pkg_get_dsm_version() {
-	local version_file="/etc.defaults/VERSION"
-
-	if [ ! -f "$version_file" ]; then
-		echo "pkg_get_dsm_version: can not find version file '$version_file'"
-		return 1
-	fi
-	local buildnumber=`grep -s ^buildnumber ${version_file} | head -1 | awk -F \" '{print $2}' | sed 's/ //g'`
-	echo ${buildnumber}
+# Pobranie wersji DSM
+dsm_get_version() {
+    local version_file="/etc.defaults/VERSION"
+    [ -f "$version_file" ] || { echo "Brak pliku wersji DSM"; return 1; }
+    grep -s ^buildnumber ${version_file} | head -1 | awk -F '"' '{print $2}' | tr -d ' '
 }
-
-DSM_BUILD_NUM=$(pkg_get_dsm_version)
+DSM_BUILD_NUM=$(dsm_get_version)
 AUTH_API_MIN_SUPPORT=2239
 
-
-
-start()
-{
-	
-	# start services
-	#$SCRIPTSPATH/S25download.sh start
-
-	
-
-	
+# Funkcja startowa
+start() {
+    echo "$(date) - Uruchamianie Pi-hole..." >> $LOG_FILE
+    $SYNO_SERVICE_TOOL --start pi-hole
 }
 
-stop()
-{
-	
-
-	# stop services
-	#$SCRIPTSPATH/S25download.sh stop
-
-	
-
+# Funkcja stop
+stop() {
+    echo "$(date) - Zatrzymywanie Pi-hole..." >> $LOG_FILE
+    $SYNO_SERVICE_TOOL --stop pi-hole
 }
 
+# Funkcja killall
+killall() {
+    echo "$(date) - Zabijanie wszystkich procesów Pi-hole..." >> $LOG_FILE
+    pkill -f pihole-FTL
+}
+
+# Główna obsługa przypadków
 case $1 in
-	start)
-		# check enabled
-		if [ ! -f $PACKAGE_ENABLED ]; then
-			exit 0;
-		fi
-
-		# start routine
-		start
-
-		exit 0
-	;;
-	stop)
-		stop
-		exit 0
-	;;
-	status)
-		if [ -e ${APP_PATH} ]; then
-			exit 0
-		else
-			exit 1
-		fi
-	;;
-	killall)
-        ;;
-	log)
-		exit 0
-	;;
+    start)
+        if [ ! -f $PACKAGE_ENABLED ]; then
+            exit 0
+        fi
+        start
+        exit 0
+    ;;
+    stop)
+        stop
+        exit 0
+    ;;
+    status)
+        [ -e ${APP_PATH} ] && exit 0 || exit 1
+    ;;
+    killall)
+        killall
+        exit 0
+    ;;
+    log)
+        tail -f $LOG_FILE
+    ;;
+    *)
+        echo "Użycie: $0 {start|stop|status|killall|log}"
+        exit 1
+    ;;
 esac
 

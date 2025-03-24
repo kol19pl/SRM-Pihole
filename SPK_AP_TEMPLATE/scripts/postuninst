@@ -5,22 +5,19 @@ SERVICETOOL="/usr/syno/bin/servicetool"
 
 remove_port_setting()
 {
-	# remove port-forwarding config file
-	${SERVICETOOL} --remove-configure-file --package synodownload_port
+	
 }
 
 remove_synosdk_userhook_plugin()
 {
-	local destusercommonfile="/usr/local/libexec/DownloadUserCommon.sh"
-	local destusersetfile="/usr/local/libexec/user_set/synodownload_userset.sh"
-	local destuserdeletefile="/usr/local/libexec/user_delete/synodownload_userdelete.sh"
+	
 
-	rm -f ${destusercommonfile} ${destusersetfile} ${destuserdeletefile}
+	
 }
 
 remove_libsynotrigger()
 {
-	rm "/lib/libsynotrigger.so"
+	
 }
 
 remove_port_setting

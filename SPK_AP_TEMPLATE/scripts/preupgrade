@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright (c) 2000-2011 Synology Inc. All rights reserved.
 
-echo "$SYNOPKG_OLD_PKGVER" > /tmp/synodl_old_pkgver
+
 
 exit 0
