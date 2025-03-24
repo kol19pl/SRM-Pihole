@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (c) 2000-2024 Synology Inc. All rights reserved.
+
 
 # Ustawienia podstawowe
 if [ -z "$SYNOPKG_PKGNAME" ]; then
@@ -51,39 +51,9 @@ migrate() {
     echo "$(date) - Migracja ustawień..." >> $LOG_FILE
 }
 
-start() {
-    echo "$(date) - Uruchamianie Pi-hole..." >> $LOG_FILE
-    $SYNO_SERVICE_TOOL --start pi-hole
-}
 
-stop() {
-    echo "$(date) - Zatrzymywanie Pi-hole..." >> $LOG_FILE
-    $SYNO_SERVICE_TOOL --stop pi-hole
-}
 
-case $1 in
-    start)
-        if [ ! -f $PACKAGE_ENABLED ]; then
-            exit 0
-        fi
-        start
-        exit 0
-    ;;
-    stop)
-        stop
-        exit 0
-    ;;
-    status)
-        [ -e ${APP_PATH} ] && exit 0 || exit 1
-    ;;
-    log)
-        tail -f $LOG_FILE
-    ;;
-    *)
-        echo "Użycie: $0 {start|stop|status|log}"
-        exit 1
-    ;;
-esac
+
 
 install_etc_and_initial
 upgradesetting

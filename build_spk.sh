@@ -7,6 +7,7 @@ if [ -d "SPK_AP_TEMPLATE" ]; then
     # Use INFO file from SPK_AP_TEMPLATE folder
     cp "SPK_AP_TEMPLATE/INFO" "$workDir/"
     cp -R "SPK_AP_TEMPLATE/scripts" "$workDir/"
+    cp -R "SPK_AP_TEMPLATE/ui" "$workDir/"
     
 else
     echo "ℹ SPK_AP_TEMPLATE folder not found. Please create it with the required INFO file and re-run this script."
@@ -26,6 +27,7 @@ mkdir -p "$workDir"
 # Copy INFO file to working directory
 cp "SPK_AP_TEMPLATE/INFO" "$workDir/"
 cp -R "SPK_AP_TEMPLATE/scripts" "$workDir/"
+cp -R "SPK_AP_TEMPLATE/ui" "$workDir/"
 
 echo "ℹ Skrypty startowe skopiowane"
 
@@ -70,11 +72,11 @@ cd "$workDir"
 if [ -f ""$workDir"/PACKAGE_ICON.PNG" ]; then
 
 echo "ℹ Ikonki są"
-tar -cf "$outputFile" INFO package.tgz scripts/ PACKAGE_ICON.PNG PACKAGE_ICON_256.PNG
+tar -cf "$outputFile" INFO package.tgz scripts/ ui/ PACKAGE_ICON.PNG PACKAGE_ICON_256.PNG
 
 else
     echo "ℹ Brak ikon"
-    tar -cf "$outputFile" INFO package.tgz scripts/
+    tar -cf "$outputFile" INFO package.tgz scripts/ ui/
 fi
 
 

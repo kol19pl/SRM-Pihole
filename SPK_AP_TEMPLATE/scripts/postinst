@@ -27,68 +27,6 @@ dsm_get_version() {
 DSM_BUILD_NUM=$(dsm_get_version)
 AUTH_API_MIN_SUPPORT=2239
 
-install_etc_and_initial() {
-    echo "$(date) - Instalacja plików konfiguracyjnych..." >> $LOG_FILE
-}
 
-upgradesetting() {
-    echo "$(date) - Aktualizacja ustawień..." >> $LOG_FILE
-}
-
-modify_port_setting() {
-    echo "$(date) - Modyfikacja ustawień portów..." >> $LOG_FILE
-}
-
-install_port_setting() {
-    echo "$(date) - Instalacja ustawień portów..." >> $LOG_FILE
-}
-
-install_synosdk_userhook_plugin() {
-    echo "$(date) - Instalacja pluginu Synology SDK..." >> $LOG_FILE
-}
-
-migrate() {
-    echo "$(date) - Migracja ustawień..." >> $LOG_FILE
-}
-
-start() {
-    echo "$(date) - Uruchamianie Pi-hole..." >> $LOG_FILE
-    $SYNO_SERVICE_TOOL --start pi-hole
-}
-
-stop() {
-    echo "$(date) - Zatrzymywanie Pi-hole..." >> $LOG_FILE
-    $SYNO_SERVICE_TOOL --stop pi-hole
-}
-
-case $1 in
-    start)
-        if [ ! -f $PACKAGE_ENABLED ]; then
-            exit 0
-        fi
-        start
-        exit 0
-    ;;
-    stop)
-        stop
-        exit 0
-    ;;
-    status)
-        [ -e ${APP_PATH} ] && exit 0 || exit 1
-    ;;
-    log)
-        tail -f $LOG_FILE
-    ;;
-    *)
-        echo "Użycie: $0 {start|stop|status|log}"
-        exit 1
-    ;;
-esac
-
-install_etc_and_initial
-upgradesetting
-install_port_setting
-install_synosdk_userhook_plugin
-migrate
 
 exit 0

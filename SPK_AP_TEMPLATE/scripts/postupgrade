@@ -1,12 +1,6 @@
 #!/bin/sh
 
 
-encrypt_account_info()
-{
 
-
-}
-
-encrypt_account_info
 
 exit 0
