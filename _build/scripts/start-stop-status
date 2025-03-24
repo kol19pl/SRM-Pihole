@@ -48,14 +48,7 @@ start()
 	# start services
 	#$SCRIPTSPATH/S25download.sh start
 
-	if [ -n "$SYNOPKG_PKG_STATUS" ]; then
-		# index help and add help to dsm
-		${DSM_INDEX_ADD} ${PKG_APP_PATH}/index.conf ${PKG_INDEXDB_PATH}/appindexdb
-		${DSM_INDEX_ADD} ${PKG_APP_PATH}/helptoc.conf ${PKG_INDEXDB_PATH}/helpindexdb
-
-		$SCRIPTSPATH/ReloadThirdPartyPath.sh add
-		$SCRIPTSPATH/ReloadThirdPartyPath.sh hupapache
-	fi
+	
 
 	
 }
@@ -67,16 +60,7 @@ stop()
 	# stop services
 	#$SCRIPTSPATH/S25download.sh stop
 
-	if [ -n "$SYNOPKG_PKG_STATUS" ]; then
-		# remove index and help entry
-		${DSM_INDEX_DEL} ${PKG_APP_PATH}/index.conf ${PKG_INDEXDB_PATH}/appindexdb
-		${DSM_INDEX_DEL} ${PKG_APP_PATH}/helptoc.conf ${PKG_INDEXDB_PATH}/helpindexdb
-
-		$SCRIPTSPATH/ReloadThirdPartyPath.sh delete
-		if [ "UPGRADE" != "$SYNOPKG_PKG_STATUS" ]; then
-			$SCRIPTSPATH/ReloadThirdPartyPath.sh hupapache &
-		fi
-	fi
+	
 
 }
 
