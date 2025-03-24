@@ -19,17 +19,11 @@ LIMIT_CONFIG="/etc/synopackageslimit.conf"
 DSM_INDEX_ADD="/usr/syno/bin/pkgindexer_add"
 DSM_INDEX_DEL="/usr/syno/bin/pkgindexer_del"
 PACKAGE_DIR="/var/packages/${PACKAGE_NAME}"
-PKG_APP_PATH="${PACKAGE_DIR}/target/ui"
-PKG_INDEXDB_PATH="${PACKAGE_DIR}/target/indexdb"
-PACKAGE_ENABLED="${PACKAGE_DIR}/enabled"
+
 PACKAGE_LIMIT=`get_key_value ${LIMIT_CONFIG} ${PACKAGE_NAME}`
 SYNO_SERVICE_TOOL="/usr/syno/sbin/synoservice"
 
-SYSTEM_WEBAPI_DIR="/usr/syno/synoman/webapi"
-PACKAGE_WEBAPI_DIR="${PACKAGE_DIR}/target/webapi"
-PACKAGE_API_FILE="pi-hole.api"
-PACKAGE_AUTH_FILE="pi-hole.auth"
-AUTH_API_FILE="Auth.api"
+
 
 
 pkg_get_dsm_version() {
@@ -46,39 +40,13 @@ pkg_get_dsm_version() {
 DSM_BUILD_NUM=$(pkg_get_dsm_version)
 AUTH_API_MIN_SUPPORT=2239
 
-CreateWebapiLink()
-{
-	ln -sf ${PACKAGE_WEBAPI_DIR}/${PACKAGE_AUTH_FILE} ${SYSTEM_WEBAPI_DIR}/${PACKAGE_AUTH_FILE}
-	ln -sf ${PACKAGE_WEBAPI_DIR}/${PACKAGE_API_FILE} ${SYSTEM_WEBAPI_DIR}/${PACKAGE_API_FILE}
-	ln -sf ${PACKAGE_WEBAPI_DIR} ${SYSTEM_WEBAPI_DIR}/${PACKAGE_NAME}
 
-	if [ ${DSM_BUILD_NUM} -lt ${AUTH_API_MIN_SUPPORT} ]; then
-		ln -sf ${PACKAGE_WEBAPI_DIR}/${AUTH_API_FILE} ${SYSTEM_WEBAPI_DIR}/${AUTH_API_FILE}
-	fi
-
-	ln -sf ${PACKAGE_WEBAPI_DIR}/${WEBAPIV5_TASK_LIB} ${SYSTEM_WEBAPI_DIR}/${WEBAPIV5_TASK_LIB}
-	ln -sf ${PACKAGE_WEBAPI_DIR}/${WEBAPIV5_BT_TASK_LIB} ${SYSTEM_WEBAPI_DIR}/${WEBAPIV5_BT_TASK_LIB}
-}
-
-RemoveWebapiLink()
-{
-	rm -rf ${SYSTEM_WEBAPI_DIR}/${PACKAGE_AUTH_FILE}
-	rm -rf ${SYSTEM_WEBAPI_DIR}/${PACKAGE_API_FILE}
-	rm -rf ${SYSTEM_WEBAPI_DIR}/${PACKAGE_NAME}
-
-	if [ ${DSM_BUILD_NUM} -lt ${AUTH_API_MIN_SUPPORT} ]; then
-		rm -rf ${SYSTEM_WEBAPI_DIR}/${AUTH_API_FILE}
-	fi
-
-	rm -rf ${SYSTEM_WEBAPI_DIR}/${WEBAPIV5_TASK_LIB}
-	rm -rf ${SYSTEM_WEBAPI_DIR}/${WEBAPIV5_BT_TASK_LIB}
-}
 
 start()
 {
 	
 	# start services
-	$SCRIPTSPATH/S25download.sh start
+	#$SCRIPTSPATH/S25download.sh start
 
 	if [ -n "$SYNOPKG_PKG_STATUS" ]; then
 		# index help and add help to dsm
@@ -89,15 +57,15 @@ start()
 		$SCRIPTSPATH/ReloadThirdPartyPath.sh hupapache
 	fi
 
-	CreateWebapiLink
+	
 }
 
 stop()
 {
-	RemoveWebapiLink
+	
 
 	# stop services
-	$SCRIPTSPATH/S25download.sh stop
+	#$SCRIPTSPATH/S25download.sh stop
 
 	if [ -n "$SYNOPKG_PKG_STATUS" ]; then
 		# remove index and help entry

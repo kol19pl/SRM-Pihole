@@ -1,4 +1,20 @@
 #!/bin/sh
-# Copyright (c) 2000-2011 Synology Inc. All rights reserved.
+
+# Path to this script
+
+# Message text handler function
+# Simple function to keep code clean and pass mneumonic code and arguments to message-text script
+
+
+# 1. Installation with previous DSM-7 installation somewhere in statis?  (install that volume if found)
+
+
+
+    # Instructions for user
+
+
+
+# 5. No news is good news
+
 
 exit 0
